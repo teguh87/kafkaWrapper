@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-   name='foo',
+   name='kafkaWrapper',
    version='1.0',
    description='wrapper module for kafka',
    author='Tso',
