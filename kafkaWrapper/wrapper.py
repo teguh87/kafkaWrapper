@@ -86,7 +86,6 @@ class KafkaWrapper:
             # self.logger.info("handling consumer {} ", msg.topic)
             handlers = self.message_handlers[msg.topic]
             for handler in handlers:
-                self.logger.info("consumer handler {}".format(str(handler)))
                 handler(self.__decode_message(msg))
             
         except Exception as e:
