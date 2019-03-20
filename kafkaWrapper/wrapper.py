@@ -82,14 +82,15 @@ class KafkaWrapper:
 
     def __run_consumed_handler(self, msg):
         try:
+            self.logger.info("handling consumer {} ", msg.topic)
             handlers = self.message_handlers[msg.topic]
             for handler in handlers:
                 handler(self.__decode_message(msg))
             self.consumer.commit()
         except Exception as e:
             self.logger.critical(e)
-            # self.consumer.close()
-            # sys.exit("error detection, system critical")
+            self.consumer.close()
+            sys.exit("error detection, system critical")
 
     def run(self):
         self.__consumer_event_driven()
