@@ -81,8 +81,9 @@ class KafkaWrapper:
         return None
 
     def __run_consumed_handler(self, msg):
+        self.logger.info("consumer topic {}".format(msg.topic))
         try:
-            self.logger.info("handling consumer {} ", msg.topic)
+            # self.logger.info("handling consumer {} ", msg.topic)
             handlers = self.message_handlers[msg.topic]
             for handler in handlers:
                 handler(self.__decode_message(msg))
