@@ -2,9 +2,11 @@ import logging
 import sys
 import json
 import base64
-
 import signal
 # import threading
+
+from http import HTTPStatus
+
 """
     Implement the logic to connect to kafka and consume messages.
     kafkaWrapper is a wrapper around kafka-python KafkaConsumer.
@@ -17,7 +19,7 @@ class KafkaWrapper:
         self.consumer = kwargs.get('consumer')
         self.producer = kwargs.get('producer')
 
-        self.message_handlers={}
+        self.message_handlers = {}
 
         logger = logging.getLogger(__name__)
 
@@ -66,7 +68,8 @@ class KafkaWrapper:
                 'topic' : record_metadata.topic,
                 'partition': record_metadata.partition,
                 'offset': record_metadata.offset,
-                'message': message
+                'message': message,
+                'status': HTTPStatus.OK
             })
             # self.logger.info('kafka response %s'%(message_return))
             return message_return
@@ -112,7 +115,7 @@ class KafkaWrapper:
     
     def __encode_message(self, message):
         _str_dict = str(message).encode('utf-8')
-        return base64.b64encode(_str_dict);
+        return base64.b64encode(_str_dict)
 
     def __decode_message(self, msg):
         return eval(base64.b64decode(msg.value))
