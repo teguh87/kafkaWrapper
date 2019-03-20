@@ -71,7 +71,7 @@ class KafkaWrapper:
                 'message': message,
                 'status': HTTPStatus.OK
             })
-            # self.logger.info('kafka response %s'%(message_return))
+            self.logger.info('kafka response %s'%(message_return))
             return message_return
         except Exception as e:
             self.logger.critical(e)
@@ -111,6 +111,7 @@ class KafkaWrapper:
 
         while True:
             for msg in self.consumer:
+                self.logger.info("TOPIC: {}, PAYLOAD: {}".format(msg.topic, msg.value))
                 self.__run_consumed_handler(msg)
     
     def __encode_message(self, message):
