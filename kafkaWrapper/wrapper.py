@@ -86,9 +86,9 @@ class KafkaWrapper:
             # self.logger.info("handling consumer {} ", msg.topic)
             handlers = self.message_handlers[msg.topic]
             for handler in handlers:
-                self.logger.info("consumer topic {}".format(str(msg)))
+                self.logger.info("consumer handler {}".format(str(handler)))
                 handler(self.__decode_message(msg))
-            self.consumer.commit()
+            
         except Exception as e:
             self.logger.critical(e)
             self.consumer.close()
@@ -116,6 +116,7 @@ class KafkaWrapper:
             for msg in self.consumer:
                 self.logger.info("TOPIC: {}, PAYLOAD: {}".format(msg.topic, msg.value))
                 self.__run_consumed_handler(msg)
+                self.consumer.commit()
     
     def __encode_message(self, message):
         _str_dict = str(message).encode('utf-8')
