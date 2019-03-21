@@ -38,19 +38,19 @@ class KafkaWrapper:
     """
     def consumed(self, topic):
         def decorator(f):
-            self.__add_message_handlers(topic, f)
+            self._add_message_handlers(topic, f)
             return f
         return decorator
 
     def produced(self, topic):
         def decorator(f):
             def func_message(message):
-                event = self.__run__producer_handler(topic, message)
+                event = self._run__producer_handler(topic, message)
                 return f(event)
             return func_message
         return decorator
 
-    def __add_message_handlers(self, topic, handler):
+    def _add_message_handlers(self, topic, handler):
         if self.message_handlers.get(topic) is None:
             self.message_handlers[topic] = []
         self.message_handlers[topic].append(handler)
@@ -59,9 +59,9 @@ class KafkaWrapper:
         :topic kafka topics
         :message kafka content message
     """
-    def __run__producer_handler(self, topic,  message):
+    def _run__producer_handler(self, topic,  message):
         # produce asynchronously send message
-        future = self.producer.send(topic,  self.__encode_message(message))
+        future = self.producer.send(topic,  self._encode_message(message))
         try:
             record_metadata = future.get(timeout=10)
             message_return =  json.dumps({
@@ -80,13 +80,13 @@ class KafkaWrapper:
         self.producer.flush() 
         return None
 
-    def __run_consumed_handler(self, msg):
+    def _run_consumed_handler(self, msg):
        
         try:
             # self.logger.info("handling consumer {} ", msg.topic)
             handlers = self.message_handlers[msg.topic]
             for handler in handlers:
-                handler(self.__decode_message(msg))
+                handler(self._decode_message(msg))
             
         except Exception as e:
             self.logger.critical(e)
@@ -94,14 +94,14 @@ class KafkaWrapper:
             sys.exit("error detection, system critical")
 
     def run(self):
-        self.__consumer_event_driven()
+        self._consumer_event_driven()
 
     def signal_term_handler(self, signal, frame):
-        self.logger.info("closing consumer")
+        self.logger.info("closing consumer signal : %s and frame : %s"%(str(signal), str(frame)))
         self.consumer.close()
         sys.exit(0)
 
-    def __consumer_event_driven(self):
+    def _consumer_event_driven(self):
         self.consumer.subscribe(topics=tuple(self.message_handlers.keys()))
         self.consumer.poll(timeout_ms=100)
         self.logger.info("starting consumer...registered signterm")
@@ -114,12 +114,12 @@ class KafkaWrapper:
         while True:
             for msg in self.consumer:
                 self.logger.info("TOPIC: {}, PAYLOAD: {}".format(msg.topic, msg.value))
-                self.__run_consumed_handler(msg)
+                self._run_consumed_handler(msg)
                 self.consumer.commit()
     
-    def __encode_message(self, message):
+    def _encode_message(self, message):
         _str_dict = str(message).encode('utf-8')
         return base64.b64encode(_str_dict)
 
-    def __decode_message(self, msg):
+    def _decode_message(self, msg):
         return eval(base64.b64decode(msg.value))
